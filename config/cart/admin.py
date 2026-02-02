@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import Cart, CartItem
 
-# Register your models here.
+
+# Inline for CartItem
 class CartItemInline(admin.TabularInline):
     model = CartItem
     extra = 0
@@ -10,8 +11,8 @@ class CartItemInline(admin.TabularInline):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ['user', 'created_at', 'updated_at']
-    search_fields = ['user__username', 'user__email']
+    # Since there's no user yet, show session_key
+    list_display = ['id', 'created_at', 'updated_at']
     readonly_fields = ['created_at', 'updated_at']
     inlines = [CartItemInline]
 
@@ -20,10 +21,10 @@ class CartAdmin(admin.ModelAdmin):
 class CartItemAdmin(admin.ModelAdmin):
     list_display = [
         'cart',
-        'product',
+        'item',  # changed from 'product' to 'item'
         'quantity',
-        'added_at'
+        'added_at',
+        'updated_at'
     ]
-    list_filter = ['added_at']
-    search_fields = ['cart__user__username', 'product__name']
+    list_filter = ['added_at', 'updated_at']
     readonly_fields = ['added_at', 'updated_at']

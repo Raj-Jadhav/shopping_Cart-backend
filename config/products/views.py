@@ -19,7 +19,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+_itemService = ItemService()
 class AddItemView(APIView):
     """
     Create a new item with photo upload.
@@ -37,8 +37,9 @@ class AddItemView(APIView):
             name = request.data.get("name")
             description = request.data.get("description", "")
             photo = request.FILES.get("photo")  # None if not uploaded
+            price = request.data.get('price')
 
-            item = ItemService.create_item(name=name, description=description, photo=photo)
+            item = ItemService.create_item(name=name, description=description, photo=photo, price=price)
 
             return Response(
                 {"id": item.id, "message": "Item created successfully"},
@@ -69,7 +70,8 @@ class ListItemsView(APIView):
                     "id": i.id,
                     "name": i.name,
                     "description": i.description,
-                    'photo': f"{settings.BACKEND_URL}{i.photo.url}" if i.photo else None
+                    'photo': f"{settings.BACKEND_URL}{i.photo.url}" if i.photo else None,
+                    'price': i.price
                 }
                 for i in items
             ]
@@ -106,3 +108,18 @@ class DeleteItemView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class UpdateItemView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, id):
+        update = _itemService.update(request, id)
+        if update['success'] == False:
+            return Response({
+                "message": "an error occured"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({
+                "message": "successful"
+            }, status=status.HTTP_200_OK)
